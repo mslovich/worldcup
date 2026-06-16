@@ -1132,6 +1132,21 @@ wikipedia_lineups <- wikipedia_lineups |>
     )
   )
 
+# When a player has more than one event in the same lineup cell (e.g. a first
+# yellow and a second yellow, each with its own minute), the events are
+# concatenated into a single string with no comma separating them, so the
+# comma-based separate_rows() below does not split them. Insert a comma after
+# the minute of one event when it is immediately followed by another event so
+# each card becomes its own row.
+wikipedia_lineups <- wikipedia_lineups |>
+  mutate(
+    events = events |>
+      str_replace_all(
+        "'\\s+(?=yellow card|second yellow card|red card|subbed on|subbed off)",
+        "', "
+      )
+  )
+
 # Expand to have one row per booking
 bookings <- wikipedia_lineups |>
   filter(str_detect(events, "card [0-9]+")) |>
@@ -1247,6 +1262,21 @@ wikipedia_lineups <- wikipedia_lineups |>
       match_id == "Peru vs Iran (1978-06-11)" & player_name == "Hossein Faraki" ~ "subbed off 51'",
       TRUE ~ events
     )
+  )
+
+# When a player has more than one event in the same lineup cell (e.g. subbed on
+# and later subbed off, each with its own minute), the events are concatenated
+# into a single string with no comma separating them, so the comma-based
+# separate_rows() below does not split them. Insert a comma after the minute of
+# one event when it is immediately followed by another event so each event
+# becomes its own row.
+wikipedia_lineups <- wikipedia_lineups |>
+  mutate(
+    events = events |>
+      str_replace_all(
+        "'\\s+(?=yellow card|second yellow card|red card|subbed on|subbed off)",
+        "', "
+      )
   )
 
 # Expand to have one row per player per substitution
